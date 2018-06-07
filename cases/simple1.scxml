@@ -1,43 +1,13 @@
-<scxml initial="moderation" version="1.0">
-    <name>Specific issue (type) flow</name>
+<?xml version="1.0" ?>
+<scxml initial="a" version="1.0">
+    <name>Simple statechart</name>
 
-    <datamodel>
-        <!--<data id="responsible_ids"/>-->
-    </datamodel>
-
-    <state id="moderation">
-        <onentry>
-            <log expr="'Entered moderation state'"/>
-        </onentry>
-        <transition event="e" cond="x==1" target="closed"/>
-        <transition event="e" target="created"/>
-        <transition event="*" target="in_progress"/>
+    <state id="a">
+        <transition event="alpha" target="b"/>
     </state>
 
-
-    <state id="created">
-        <onentry>foo(data)</onentry>
-        <transition event="e" cond="x==1" target="in_progress"/>
-        <transition event="e" target="moderation"/>
-        <transition event="*" target="closed"/>
-        <onexit>bar(x, y)</onexit>
+    <state id="b" final="true">
+        <final/>
     </state>
 
-    <state id="in_progress">
-        <transition event="e" cond="x==1" target="moderation"/>
-        <transition event="e" target="close"/>
-        <transition event="*" target="created"/>
-    </state>
-
-
-    <state id="closed">
-        <transition event="e" cond="x==1" target="created"/>
-        <transition event="e" target="in_progress"/>
-        <transition event="*" target="moderation"/>
-    </state>
 </scxml>
-
-<!--[-->
-<!--{"status": "moderation", "responsible": [1413], "post_actions": [{"action": "auto_review"}]}, -->
-<!--{"status": "on_check", "responsible": [1418], "post_actions": [{"action": "process_issue"}]}-->
-<!--]-->

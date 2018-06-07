@@ -1,7 +1,8 @@
 import os
 from setuptools import setup, find_packages
 
-version = os.environ.get("VERSION")
+with open("VERSION", 'r') as version_file:
+    version = os.environ.get("VERSION", version_file.read().strip())
 
 setup(
     name='mixmorph',

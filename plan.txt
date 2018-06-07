@@ -20,6 +20,7 @@
  • activity packages, registration, use
  • scxml variables assignment
  • scxml logging
+ • sc versioning
  • celery tasks activity
  • send events from activities
  • conditional transitions
