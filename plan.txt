@@ -1,0 +1,30 @@
+ • asynchronous processor engine
+ • use arbitrary storage for SC
+ • memory SC storage
+ • DB SC storage
+ • lock SC on get from storage. ensure single-use
+ • load SC into internal python structures
+ • simple FSM processor
+ • parallel states
+ • history states
+ • get events from abstract source
+ • rabbitmq event source
+ • memory event source
+ • unload SC to storage
+ • broadcast events
+ • load SC from storage by expected_events
+ • targeted events
+ • custom SC storage based on DB SC storage
+ • unit of work for SC transaction
+ • activities
+ • activity packages, registration, use
+ • scxml variables assignment
+ • scxml logging
+ • celery tasks activity
+ • send events from activities
+ • conditional transitions
+ • transition with activity without target
+ • calc test project based on mixmorph
+ • ss payment engine based on mixmorph
+ • issues engine based on mixmorph
+ • performance testing
