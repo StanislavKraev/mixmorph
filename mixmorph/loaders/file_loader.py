@@ -1,13 +1,27 @@
 import os
 
-from mixmorph import State, Statechart
+from mixmorph import State, Statechart, Transition, Event
 from mixmorph.loaders import StatechartNotExist, InvalidStatechartXML
 
 
-def _state_from_element(el):
+def _load_state_element(el):
     state_id = el.attrib['id']
     state = State(state_id)
-    return state
+
+    transitions = {}
+    for transition_element in el.findall('transition'):
+        event_id = transition_element.attrib['event']
+        if event_id in transitions:
+            raise InvalidStatechartXML()
+
+        target_state_id = transition_element.attrib.get('target')
+        transition = Transition(
+            event=Event(event_id),
+            target=State(target_state_id) if target_state_id else None
+        )
+        transitions[event_id] = transition
+
+    return state, transitions
 
 
 def load_from_file(path: str) -> Statechart:
@@ -34,14 +48,18 @@ def load_from_file(path: str) -> Statechart:
     }
     initial_state = None
 
+    transitions = {}
+
     for state_element in root.findall('state'):
         state_id = state_element.attrib['id']
         if not state_id:
             raise InvalidStatechartXML()
         if state_id in states:
             raise InvalidStatechartXML()
-        state = _state_from_element(state_element)
+        state, state_transitions = _load_state_element(state_element)
         states[state_id] = state
+
+        transitions[state_id] = list(state_transitions.values())
 
         if state.id == initial_state_id:
             initial_state = state
@@ -51,6 +69,7 @@ def load_from_file(path: str) -> Statechart:
 
     statechart = Statechart(
         states,
-        initial_state
+        initial_state,
+        transitions
     )
     return statechart

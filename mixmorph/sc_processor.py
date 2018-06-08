@@ -17,7 +17,7 @@ class SCProcessor:
         self._state = self._statechart.initial_state
 
     def on(self, event: Event):
-        transitions = self._state.transitions
+        transitions = self._statechart.transitions(self._state.id)
         for transition in transitions:
             if transition.event == event:
                 if transition.target:

@@ -13,5 +13,5 @@ def sc_processor_simple(sc_processor: SCProcessor, cases_path):
 
 
 def test_should_transit_from_a_to_b_when_event_alpha_triggered(sc_processor_simple):
-    sc_processor_simple.on(Event())
+    sc_processor_simple.on(Event(event_id="alpha"))
     assert State("b") == sc_processor_simple.state
