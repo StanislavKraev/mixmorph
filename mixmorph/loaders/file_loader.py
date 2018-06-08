@@ -1,7 +1,7 @@
 import os
 from typing import Optional, List
 
-from mixmorph import State, Statechart, Transition, Event
+from mixmorph import State, Statechart, Transition, Event, StatechartContext
 from mixmorph.loaders import StatechartNotExist, InvalidStatechartXML, StatechartLoader
 
 
@@ -77,4 +77,7 @@ class SCFileLoader(StatechartLoader):
             initial_state,
             transitions
         )
+        context = StatechartContext()
+        context.state = initial_state
+        statechart.context = context
         return [statechart]
