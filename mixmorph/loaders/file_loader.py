@@ -1,7 +1,8 @@
 import os
+from typing import Optional, List
 
 from mixmorph import State, Statechart, Transition, Event
-from mixmorph.loaders import StatechartNotExist, InvalidStatechartXML
+from mixmorph.loaders import StatechartNotExist, InvalidStatechartXML, StatechartLoader
 
 
 def _load_state_element(el):
@@ -24,52 +25,56 @@ def _load_state_element(el):
     return state, transitions
 
 
-def load_from_file(path: str) -> Statechart:
-    if not os.path.exists(path):
-        raise StatechartNotExist(path)
+class SCFileLoader(StatechartLoader):
+    def __init__(self, path: str):
+        self._path = path
 
-    import xml.etree.ElementTree as ET
-    try:
-        tree = ET.parse(path)
-    except Exception:
-        raise InvalidStatechartXML()
+    def load(self, event: Optional[str] = None) -> List[Statechart]:
+        if not os.path.exists(self._path):
+            raise StatechartNotExist(self._path)
 
-    root = tree.getroot()
-
-    if root.tag != "scxml":
-        raise InvalidStatechartXML()
-
-    if 'initial' in root.attrib:
-        initial_state_id = root.attrib['initial']
-    else:
-        raise InvalidStatechartXML()
-
-    states = {
-    }
-    initial_state = None
-
-    transitions = {}
-
-    for state_element in root.findall('state'):
-        state_id = state_element.attrib['id']
-        if not state_id:
+        import xml.etree.ElementTree as ET
+        try:
+            tree = ET.parse(self._path)
+        except Exception:
             raise InvalidStatechartXML()
-        if state_id in states:
+
+        root = tree.getroot()
+
+        if root.tag != "scxml":
             raise InvalidStatechartXML()
-        state, state_transitions = _load_state_element(state_element)
-        states[state_id] = state
 
-        transitions[state_id] = list(state_transitions.values())
+        if 'initial' in root.attrib:
+            initial_state_id = root.attrib['initial']
+        else:
+            raise InvalidStatechartXML()
 
-        if state.id == initial_state_id:
-            initial_state = state
+        states = {
+        }
+        initial_state = None
 
-    if not initial_state:
-        raise InvalidStatechartXML()
+        transitions = {}
 
-    statechart = Statechart(
-        states,
-        initial_state,
-        transitions
-    )
-    return statechart
+        for state_element in root.findall('state'):
+            state_id = state_element.attrib['id']
+            if not state_id:
+                raise InvalidStatechartXML()
+            if state_id in states:
+                raise InvalidStatechartXML()
+            state, state_transitions = _load_state_element(state_element)
+            states[state_id] = state
+
+            transitions[state_id] = list(state_transitions.values())
+
+            if state.id == initial_state_id:
+                initial_state = state
+
+        if not initial_state:
+            raise InvalidStatechartXML()
+
+        statechart = Statechart(
+            states,
+            initial_state,
+            transitions
+        )
+        return [statechart]

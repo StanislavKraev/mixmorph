@@ -8,3 +8,7 @@ class Event:
             return False
 
         return self._event_id == other._event_id
+
+    @property
+    def id(self):
+        return self._event_id

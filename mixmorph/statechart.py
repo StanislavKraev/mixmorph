@@ -5,7 +5,7 @@ from mixmorph import State, Transition
 
 class Statechart:
 
-    def __init__(self, states: dict, initial_state: State, state_transitions: Dict[str, List[State]]):
+    def __init__(self, states: dict, initial_state: State, state_transitions: Dict[str, List[Transition]]):
         self._states = states
         self._initial_state = initial_state
         self._state_transitions = state_transitions
