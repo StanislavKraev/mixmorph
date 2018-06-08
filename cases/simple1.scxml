@@ -6,7 +6,11 @@
         <transition event="alpha" target="b"/>
     </state>
 
-    <state id="b" final="true">
+    <state id="b">
+        <transition event="beta" target="c"/>
+    </state>
+
+    <state id="c">
         <final/>
     </state>
 
