@@ -13,3 +13,6 @@ class State:
             return False
 
         return other.id == self.id
+
+    def __repr__(self):
+        return f"State('{self._id}') [id={id(self)}]"

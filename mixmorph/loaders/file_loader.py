@@ -28,8 +28,12 @@ def _load_state_element(el):
 class SCFileLoader(StatechartLoader):
     def __init__(self, path: str):
         self._path = path
+        self._sc_cache = {}
 
     def load(self, event: Optional[str] = None) -> List[Statechart]:
+        if self._path in self._sc_cache:
+            return [self._sc_cache[self._path]]
+
         if not os.path.exists(self._path):
             raise StatechartNotExist(self._path)
 
@@ -80,4 +84,6 @@ class SCFileLoader(StatechartLoader):
         context = StatechartContext()
         context.state = initial_state
         statechart.context = context
+
+        self._sc_cache[self._path] = statechart
         return [statechart]
