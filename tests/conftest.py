@@ -7,15 +7,18 @@ from mixmorph import SCProcessor
 from mixmorph.loaders import SCFileLoader
 
 
-@pytest.fixture
-def sc_file_loader(cases_path):
+@pytest.fixture()
+def simple_file_statechart():
     loader = SCFileLoader(str(Path(cases_path) / "simple1.scxml"))
-    return loader
+
+    return loader.load()[0]
 
 
 @pytest.fixture()
-def simple_file_statechart(sc_file_loader):
-    return sc_file_loader.load()[0]
+def activities_statechart():
+    loader = SCFileLoader(str(Path(cases_path) / "activities.scxml"))
+
+    return loader.load()[0]
 
 
 @pytest.fixture
