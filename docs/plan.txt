@@ -1,3 +1,6 @@
+ * TODO: all events to the queue
+
+
  • asynchronous processor engine
  • use arbitrary storage for SC
  • memory SC storage
