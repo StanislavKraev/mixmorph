@@ -5,5 +5,5 @@ from mixmorph import Statechart
 
 class StatechartLoader:
 
-    def load(self, event: Optional[str] = None) -> List[Statechart]:
+    def load(self, **kwargs) -> List[Statechart]:
         raise NotImplementedError()

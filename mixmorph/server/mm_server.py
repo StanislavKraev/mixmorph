@@ -6,10 +6,14 @@ Note that no attempt is made to re-send messages that are
 generated while the connection is down.
 """
 import asyncio
+import os
+
 import asynqp
 from asyncio.futures import InvalidStateError
 
 # Global variables are ugly, but this is a simple example
+from mixmorph.loaders import SCFileLoader
+
 CHANNELS = []
 CONNECTION = None
 CONSUMER = None
@@ -54,27 +58,70 @@ class ContextNotFound(Exception):
     pass
 
 
-async def setup_consumer(connection):
+class SCLoader:
+    def __init__(self):
+        self._file_loader = SCFileLoader()
+
+    async def load(self, statechart_id: str):
+        file_path = os.path.normpath(os.path.abspath(os.path.join(os.path.dirname(__file__), f"../../cases/{statechart_id}.scxml")))
+        return self._file_loader.load(file_path)
+
+sc_loader = SCLoader()
+
+
+class SCContextLoader:
+    async def load(self, statechart_id: str, context_id: str):
+        pass
+
+    async def save(self, statechart_id: str, context):
+        pass
+
+sc_context_loader = SCContextLoader()
+
+
+def get_sc_context_lock(statechart_id: str, context_id: str):
+    lock = 1
+    return lock
+
+
+class StatechartProcessor:
+    def __init__(self, statechart, context):
+        self._sc = statechart
+        self._context = context
+
+    async def on(self, event):
+        pass
+
+    @property
+    def context(self):
+        return
+
+
+async def process_message(msg):
+    msg_data = msg.json()
+    sc_id = msg_data['scid']
+    context_id = msg_data['cid']
+    event = msg_data['event']
+
+    sc = await sc_loader.load(sc_id)
+    if not sc:
+        raise UnprocessableEvent(sc_id, event)
+    context = await sc_context_loader.load(sc_id, context_id)
+    if not context:
+        raise ContextNotFound(sc_id, context_id)
+
+    context_lock = get_sc_context_lock(sc_id, context_id)
+    with context_lock:
+        sc_processor = StatechartProcessor(sc, context)
+        await sc_processor.on(event)
+    await sc_context_loader.save(sc_id, sc_processor.context)
+
+
+async def setup_consumer(connection, loop):
     # callback will be called each time a message is received from the queue
     def callback(msg):
         try:
-            msg_data = msg.json()
-            sc_id = msg_data['scid']
-            context_id = msg_data['cid']
-            event = msg_data['event']
-
-            sc = await sc_loader.load(sc_id, event)
-            if not sc:
-                raise UnprocessableEvent(sc_id, event)
-            context = await sc_context_loader(sc_id, context_id)
-            if not context:
-                raise ContextNotFound(sc_id, context_id)
-
-            context_lock = get_sc_context_lock(sc_id, context_id)   # across different processes/hosts? or...
-            with context_lock:
-                sc_processor = StatechartProcessor(sc, context)
-                await sc_processor.on(event)
-            await sc_context_loader.save(sc_id, sc_processor.context)
+            loop.create_task(process_message(msg))
         except Exception as ex:
             print(ex)
         finally:
@@ -132,7 +179,7 @@ async def start(loop):
     global PRODUCER
     try:
         CONNECTION = await setup_connection(loop)
-        CONSUMER = await setup_consumer(CONNECTION)
+        CONSUMER = await setup_consumer(CONNECTION, loop)
         PRODUCER = loop.create_task(setup_producer(CONNECTION))
     # Multiple exceptions may be thrown, ConnectionError, OsError
     except Exception:
