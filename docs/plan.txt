@@ -1,4 +1,20 @@
- * TODO: all events to the queue
+ * handle 2 different statechart in amqp event processing
+
+ * async events processing in aihttp event loop
+   - keep events execution order
+   - lock sc on event processing
+   - wait for sc ready (not locked)
+
+ * mm server
+   - internal asyncio event loop
+   - rabbitmq messaging (aioqp)
+   - utilize all code from previous approach
+   - mm client
+
+ * activities
+   - asynchronous, right on event processing
+   - decoupled through messaging - rabbitmq
+   - decoupled through mm client/server
 
 
  • asynchronous processor engine

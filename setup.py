@@ -24,7 +24,8 @@ setup(
     #package_data={'smartspace': ['tests/test_config.cfg']},
     zip_safe=False,
     install_requires=[
-        'pytest'
+        'pytest',
+        'asynqp'
     ],
     python_requires='>=3.6,!=2.*',
     classifiers=[
