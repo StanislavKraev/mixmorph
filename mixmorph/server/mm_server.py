@@ -12,6 +12,9 @@ import asynqp
 from asyncio.futures import InvalidStateError
 
 # Global variables are ugly, but this is a simple example
+from mixmorph import StatechartContext, SCProcessor, Event
+from mixmorph.context_loader import StatechartContextLoader
+from mixmorph.hardcode_sc import HardcodeSC
 from mixmorph.loaders import SCFileLoader
 
 CHANNELS = []
@@ -63,24 +66,44 @@ class SCLoader:
         self._file_loader = SCFileLoader()
 
     async def load(self, statechart_id: str):
+        if statechart_id == 'hardcode':
+            return HardcodeSC()
         file_path = os.path.normpath(os.path.abspath(os.path.join(os.path.dirname(__file__), f"../../cases/{statechart_id}.scxml")))
-        return self._file_loader.load(file_path)
+        return await self._file_loader.load(file_path)
 
 sc_loader = SCLoader()
 
 
 class SCContextLoader:
+    def __init__(self):
+        self.hc_context = {
+            '3': 'a'
+        }
+
     async def load(self, statechart_id: str, context_id: str):
-        pass
+        if statechart_id == 'hardcode':
+            c = self.hc_context.get(context_id)
+            if c:
+                c_obj = StatechartContext()
+                c_obj.state = c
+                return c_obj
+            return
+        loader = StatechartContextLoader()
+        await loader.init()
+        return await loader.load(context_id)
 
     async def save(self, statechart_id: str, context):
         pass
 
+
 sc_context_loader = SCContextLoader()
+
+locks = {}
 
 
 def get_sc_context_lock(statechart_id: str, context_id: str):
-    lock = 1
+    k = f"{statechart_id}/{context_id}"
+    lock = locks.setdefault(k, asyncio.Lock())
     return lock
 
 
@@ -90,7 +113,8 @@ class StatechartProcessor:
         self._context = context
 
     async def on(self, event):
-        pass
+        p = SCProcessor()
+        await p.on(self._sc, self._context, event)
 
     @property
     def context(self):
@@ -101,7 +125,7 @@ async def process_message(msg):
     msg_data = msg.json()
     sc_id = msg_data['scid']
     context_id = msg_data['cid']
-    event = msg_data['event']
+    event = Event(msg_data['event'])
 
     sc = await sc_loader.load(sc_id)
     if not sc:
@@ -111,7 +135,7 @@ async def process_message(msg):
         raise ContextNotFound(sc_id, context_id)
 
     context_lock = get_sc_context_lock(sc_id, context_id)
-    with context_lock:
+    async with context_lock:
         sc_processor = StatechartProcessor(sc, context)
         await sc_processor.on(event)
     await sc_context_loader.save(sc_id, sc_processor.context)

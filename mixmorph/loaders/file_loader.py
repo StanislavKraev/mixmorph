@@ -29,9 +29,9 @@ class SCFileLoader(StatechartLoader):
     def __init__(self):
         self._sc_cache = {}
 
-    async def load(self, path) -> List[Statechart]:
+    async def load(self, path) -> Statechart:
         if path in self._sc_cache:
-            return [self._sc_cache[path]]
+            return self._sc_cache[path]
 
         if not os.path.exists(path):
             raise StatechartNotExist(path)
@@ -39,7 +39,7 @@ class SCFileLoader(StatechartLoader):
         import xml.etree.ElementTree as ET
         try:
             tree = ET.parse(path)
-        except Exception:
+        except Exception as e:
             raise InvalidStatechartXML()
 
         root = tree.getroot()
@@ -84,5 +84,5 @@ class SCFileLoader(StatechartLoader):
         context.state = initial_state
         statechart.context = context
 
-        self._sc_cache[self._path] = statechart
-        return [statechart]
+        self._sc_cache[path] = statechart
+        return statechart

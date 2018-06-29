@@ -1,43 +1,55 @@
 
-import psycopg2
+import asyncio
+from aiopg.sa import create_engine
+import sqlalchemy as sa
+
 
 from mixmorph import StatechartContext
 
 
+metadata = sa.MetaData()
+tbl = sa.Table(
+    'sc_context', metadata,
+    sa.Column('id', sa.Integer, primary_key=True),
+    sa.Column('state', sa.String)
+)
+
+
 class StatechartContextLoader:
     def __init__(self):
-        self.conn = psycopg2.connect("dbname='mm' user='postgres' host='127.0.0.1' password='postgres'")
+        self.engine = None
 
-    def load(self, oid):
-        c = self.conn.cursor()
-        c.execute("SELECT state FROM sc_context WHERE id=%(id)s", {'id': oid})
+    async def init(self):
+        self.engine = await create_engine(
+            user='postgres',
+            database='mm',
+            host='127.0.0.1',
+            password='postgres'
+        )
 
-        result = c.fetchone()
-        if not result:
-            raise ValueError(f"Failed to find state context {oid}")
+    async def load(self, oid):
+        async with self.engine.acquire() as conn:
+            for row in await conn.execute("SELECT state FROM sc_context WHERE id=%(id)s", {'id': oid}):
+                sc = StatechartContext()
+                sc.state = row[0]
+                sc._id = oid
+                return sc
 
-        # We can also close the connection if we are done with it.
-        # Just be sure any changes have been committed or they will be lost.
-        c.close()
-        sc = StatechartContext()
-        sc.state = result[0]
-        sc._id = oid
-        return sc
+    async def save(self, context):
+        async with self.engine.acquire() as conn:
+            await conn.execute('DROP TABLE IF EXISTS tbl')
+            await conn.execute("""CREATE TABLE tbl (id serial PRIMARY KEY, val varchar(255))""")
 
-    def save(self, context):
-        c = self.conn.cursor()
+            tx = await conn.begin()
+            try:
+                if not context._id:
+                    await conn.execute("INSERT INTO sc_context (state) VALUES (%(state)s)", {'state': context.state.id})
+                    context._id = conn.lastrowid
+                else:
+                    await conn.execute("UPDATE sc_context SET state=%(state)s WHERE id=%(id)s", {'state': context.state.id, 'id': context._id})
+                await tx.commit()
+            except Exception:
+                await tx.rollback()
 
-        c.execute("CREATE TABLE IF NOT EXISTS sc_context"
-                  "(id SERIAL, state VARCHAR)")
 
-        if not context._id:
-            c.execute("INSERT INTO sc_context (state) VALUES (%(state)s)", {'state': context.state.id})
-            context._id = c.lastrowid
-        else:
-            c.execute("UPDATE sc_context SET state=%(state)s WHERE id=%(id)s", {'state': context.state.id, 'id': context._id})
-        # Save (commit) the changes
-        self.conn.commit()
 
-        # We can also close the connection if we are done with it.
-        # Just be sure any changes have been committed or they will be lost.
-        c.close()

@@ -6,8 +6,8 @@
         <transition event="alpha" target="b">
             <send type="rabbitmq://user:password//">
                 <content>
-                    <rabbitmq:queue>default</queue>
-                    <rabbitmq:data><![CDATA[ {"type":[{"name":"acoustic","instrument":[{"name":"GUITAR"},{"name":"VIOLIN"}]}]} ]]></data>
+                    <queue>default</queue>
+                    <data><![CDATA[ {"type":[{"name":"acoustic","instrument":[{"name":"GUITAR"},{"name":"VIOLIN"}]}]} ]]></data>
                 </content>
             </send>
         </transition>
@@ -15,10 +15,10 @@
 
     <state id="b">
         <transition event="beta">
-            <send event="fire">
+            <send event="fire"/>
         </transition>
         <transition event="fire">
-            <log expr="fire in b">
+            <log expr="fire in b"/>
         </transition>
         <final/>
     </state>

@@ -5,9 +5,10 @@ from mixmorph.event import Event
 
 
 class Transition:
-    def __init__(self, event: Event, target: State = None):
+    def __init__(self, event: Event, target: State = None, activity = None):
         self._event = event
         self._target = target
+        self._activity = activity
 
     @property
     def event(self) -> Event:
@@ -16,3 +17,7 @@ class Transition:
     @property
     def target(self) -> Optional[State]:
         return self._target
+
+    @property
+    def activity(self):
+        return self._activity
