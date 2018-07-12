@@ -14,4 +14,4 @@ class Event:
         return self._event_id
 
     def __repr__(self):
-        return f"Event{self._event_id}"
+        return f"Event({self._event_id})"

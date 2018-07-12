@@ -1,6 +1,5 @@
 
 import asyncio
-from aiopg.sa import create_engine
 import sqlalchemy as sa
 
 
@@ -20,6 +19,7 @@ class StatechartContextLoader:
         self.engine = None
 
     async def init(self):
+        from aiopg.sa import create_engine
         self.engine = await create_engine(
             user='postgres',
             database='mm',
