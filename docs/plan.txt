@@ -1,3 +1,11 @@
+for standalone tests:
+
+ * on enter, on exit actions
+ * multistate support
+ * load scxml
+ * store/load context - async db context loader
+
+
  * handle 2 different statechart in amqp event processing
 
  * async events processing in aihttp event loop
