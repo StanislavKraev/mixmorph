@@ -18,8 +18,8 @@ def on_enter_c(sc):
     pass
 
 
-def some_action(sc):
-    pass
+async def some_action(sc):
+    print("some action!")
 
 
 def create_sc():
@@ -35,7 +35,7 @@ def create_sc():
 
     statechart.add_transition(s1, Event("alpha"), target=s2)
     statechart.add_transition(s2, Event("beta"), target=s3)
-    statechart.add_transition(s2, Event("gamma"), action=some_action)
+    statechart.add_transition(s3, Event("gamma"), action=some_action)
 
     statechart.initial_state = s1
 
