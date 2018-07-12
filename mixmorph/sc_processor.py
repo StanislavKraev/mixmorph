@@ -1,12 +1,11 @@
 import asyncio
-import functools
 
-from mixmorph import Event
+from mixmorph import Event, State, Statechart
 
 
 class SCProcessor:
 
-    async def on(self, sc, context, event: Event):
+    async def on(self, sc: Statechart, context, event: Event):
 
         # context = StatechartContext()
         # context.state = "a"
@@ -17,11 +16,15 @@ class SCProcessor:
 
         processed = False
         for transition in transitions:
-            if transition.event == event:
+            if transition.event == event.id:
                 processed = True
                 if transition.target:
-                    context.state = transition.target
+                    if context.state.on_exit:
+                        await asyncio.ensure_future(context.state.on_exit(sc))
+                    context.state = sc.get_state(transition.target)
                     print(f"now state: {context.state}")
+                    if context.state.on_enter:
+                        await asyncio.ensure_future(context.state.on_enter(sc))
                 if transition.action:
                     asyncio.ensure_future(transition.action(sc))
         if not processed:

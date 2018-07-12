@@ -1,6 +1,7 @@
 for standalone tests:
 
- * on enter, on exit actions
+ + on enter, on exit actions
+ * conditions
  * multistate support
  * load scxml
  * store/load context - async db context loader

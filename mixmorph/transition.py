@@ -1,21 +1,18 @@
 from typing import Optional
 
-from mixmorph.state import State
-from mixmorph.event import Event
-
 
 class Transition:
-    def __init__(self, event: Event, target: State = None, action = None):
-        self._event = event
-        self._target = target
+    def __init__(self, event_id: str, target_id: str = None, action=None):
+        self._event = event_id
+        self._target: str = target_id
         self._action = action
 
     @property
-    def event(self) -> Event:
+    def event(self) -> str:
         return self._event
 
     @property
-    def target(self) -> Optional[State]:
+    def target(self) -> Optional[str]:
         return self._target
 
     @property

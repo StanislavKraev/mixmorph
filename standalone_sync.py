@@ -2,20 +2,32 @@ import warnings
 
 import syncer
 
-from mixmorph import Statechart, State, Event, StatechartContext
+from mixmorph import Statechart, Event, StatechartContext
 from mixmorph.server.mm_server import StatechartProcessor
 
 
-def on_enter_a(sc):
-    pass
+async def on_enter_a(sc):
+    print("on enter a")
 
 
-def on_enter_b(sc):
-    pass
+async def on_enter_b(sc):
+    print("on enter b")
 
 
-def on_enter_c(sc):
-    pass
+async def on_enter_c(sc):
+    print("on enter c")
+
+
+async def on_exit_a(sc):
+    print("on exit a")
+
+
+async def on_exit_b(sc):
+    print("on exit b")
+
+
+async def on_exit_c(sc):
+    print("on exit c")
 
 
 async def some_action(sc):
@@ -25,19 +37,15 @@ async def some_action(sc):
 def create_sc():
     statechart = Statechart()
 
-    s1 = State("a")
-    s2 = State("b")
-    s3 = State("c")
+    statechart.add_state("a", on_enter=on_enter_a, on_exit=on_exit_a)
+    statechart.add_state("b", on_enter=on_enter_b, on_exit=on_exit_b)
+    statechart.add_state("c", on_enter=on_enter_c, on_exit=on_exit_c)
 
-    statechart.add_state(s1)
-    statechart.add_state(s2)
-    statechart.add_state(s3)
+    statechart.add_transition("a", "alpha", target="b")
+    statechart.add_transition("b", "beta", target="c")
+    statechart.add_transition("c", "gamma", action=some_action)
 
-    statechart.add_transition(s1, Event("alpha"), target=s2)
-    statechart.add_transition(s2, Event("beta"), target=s3)
-    statechart.add_transition(s3, Event("gamma"), action=some_action)
-
-    statechart.initial_state = s1
+    statechart.initial_state = "a"
 
     return statechart
 
