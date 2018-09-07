@@ -1,5 +1,4 @@
 import os
-from typing import Optional, List
 
 from mixmorph import State, Statechart, Transition, Event, StatechartContext
 from mixmorph.loaders import StatechartNotExist, InvalidStatechartXML, StatechartLoader
@@ -17,8 +16,8 @@ def _load_state_element(el):
 
         target_state_id = transition_element.attrib.get('target')
         transition = Transition(
-            event=Event(event_id),
-            target=State(target_state_id) if target_state_id else None
+            event_id=event_id,
+            target_id=target_state_id
         )
         transitions[event_id] = transition
 
@@ -75,11 +74,7 @@ class SCFileLoader(StatechartLoader):
         if not initial_state:
             raise InvalidStatechartXML()
 
-        statechart = Statechart(
-            states,
-            initial_state,
-            transitions
-        )
+        statechart = Statechart()
         context = StatechartContext()
         context.state = initial_state
         statechart.context = context

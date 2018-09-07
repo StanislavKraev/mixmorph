@@ -1,21 +1,12 @@
-"""
-Example async consumer and publisher that will reconnect
-automatically when a connection to rabbitmq is broken and
-restored.
-Note that no attempt is made to re-send messages that are
-generated while the connection is down.
-"""
 import asyncio
-import os
-
-import asynqp
 from asyncio.futures import InvalidStateError
 
-# Global variables are ugly, but this is a simple example
-from mixmorph import StatechartContext, SCProcessor, Event
-from mixmorph.context_loader import StatechartContextLoader
-from mixmorph.hardcode_sc import HardcodeSC
-from mixmorph.loaders import SCFileLoader
+import asynqp
+
+from mixmorph import SCProcessor, Event
+from mixmorph.server.context_loader import SCContextLoader
+from mixmorph.server.errors import UnprocessableEvent, ContextNotFound
+from mixmorph.server.statechart_loader import SCLoader
 
 CHANNELS = []
 CONNECTION = None
@@ -26,7 +17,6 @@ GENERAL_ROUTING = 'mm-general-queue'
 
 
 async def setup_connection(loop):
-    # connect to the RabbitMQ broker
     connection = await asynqp.connect(
         'localhost',
         5672,
@@ -37,65 +27,16 @@ async def setup_connection(loop):
 
 
 async def setup_exchange_and_queue(connection):
-    # Open a communications channel
     channel = await connection.open_channel()
-
-    # Create a queue and an exchange on the broker
     exchange = await channel.declare_exchange('general.exchange', 'direct')
     queue = await channel.declare_queue('mm.queue')
-
-    # Save a reference to each channel so we can close it later
     CHANNELS.append(channel)
 
-    # Bind the queue to the exchange, so the queue will get messages published to the exchange
     await queue.bind(exchange, GENERAL_ROUTING)
-
     return exchange, queue
 
 
-class UnprocessableEvent(Exception):
-    pass
-
-
-class ContextNotFound(Exception):
-    pass
-
-
-class SCLoader:
-    def __init__(self):
-        self._file_loader = SCFileLoader()
-
-    async def load(self, statechart_id: str):
-        if statechart_id == 'hardcode':
-            return HardcodeSC()
-        file_path = os.path.normpath(os.path.abspath(os.path.join(os.path.dirname(__file__), f"../../cases/{statechart_id}.scxml")))
-        return await self._file_loader.load(file_path)
-
 sc_loader = SCLoader()
-
-
-class SCContextLoader:
-    def __init__(self):
-        self.hc_context = {
-            '3': 'a'
-        }
-
-    async def load(self, statechart_id: str, context_id: str):
-        if statechart_id == 'hardcode':
-            c = self.hc_context.get(context_id)
-            if c:
-                c_obj = StatechartContext()
-                c_obj.state = c
-                return c_obj
-            return
-        loader = StatechartContextLoader()
-        await loader.init()
-        return await loader.load(context_id)
-
-    async def save(self, statechart_id: str, context):
-        pass
-
-
 sc_context_loader = SCContextLoader()
 
 locks = {}
@@ -142,7 +83,6 @@ async def process_message(msg):
 
 
 async def setup_consumer(connection, loop):
-    # callback will be called each time a message is received from the queue
     def callback(msg):
         try:
             loop.create_task(process_message(msg))
@@ -152,30 +92,24 @@ async def setup_consumer(connection, loop):
             msg.ack()
 
     _, queue = await setup_exchange_and_queue(connection)
-
-    # connect the callback to the queue
     consumer = await queue.consume(callback)
     return consumer
 
 
 async def setup_producer(connection):
-    """
-    The producer will live as an asyncio.Task
-    to stop it call Task.cancel()
-    """
     exchange, _ = await setup_exchange_and_queue(connection)
 
     count = 0
     while True:
         msg = asynqp.Message({
-            'scid': "simple1",      # statechart id
+            'scid': "hardcode",      # statechart id
             'cid': "1",             # context object id
             'event': "alpha"
         })
         exchange.publish(msg, GENERAL_ROUTING)
 
         msg = asynqp.Message({
-            'scid': "activities",   # statechart id
+            'scid': "hardcode",   # statechart id
             'cid': "2",             # context object id
             'event': "beta"
         })
@@ -193,11 +127,6 @@ async def setup_producer(connection):
 
 
 async def start(loop):
-    """
-    Creates a connection, starts the consumer and producer.
-    If it fails, it will attempt to reconnect after waiting
-    1 second
-    """
     global CONNECTION
     global CONSUMER
     global PRODUCER
@@ -205,7 +134,7 @@ async def start(loop):
         CONNECTION = await setup_connection(loop)
         CONSUMER = await setup_consumer(CONNECTION, loop)
         PRODUCER = loop.create_task(setup_producer(CONNECTION))
-    # Multiple exceptions may be thrown, ConnectionError, OsError
+
     except Exception:
         print('failed to connect, trying again.')
         await asyncio.sleep(1)

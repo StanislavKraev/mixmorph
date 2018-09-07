@@ -1,0 +1,39 @@
+правила
+
+в одном statechart'е может быть любое количество state'ов и statechart'ов
+вложенные statechart'ы на одном уровне являются параллельными, при этом
+    состояния, расположенные на одном уровне со вложенными statechart'ами не параллельны вложенным statechart'ам
+переходы могут быть настроеные как между state'ами, так и statechart'ами в любой комбинации
+пре необходимости сделать переход из параллельных state'ов (в statechart'ах на одном уровне)
+    указывается один из state'ов и в условиях указываются остальные state'ы
+
+типы описания statechart'ов:
+
+1. hardcoded
+2. database
+3. scxml file
+
+* регистрация statechart'ов на сервере
+    - по uri
+    - по инстансу
+
+
+методы хранения контекста:
+
+1. in-memory
+2. database
+3. structured in db
+
+
+
+server.register_statechart(
+    '<statechart_unique_server_id>',
+    'hardcode://mixmorph.hardcode_sc.HardcodeSC',
+    'memory://'
+)
+
+server.register_statechart(
+    '<statechart_unique_server_id>',
+    'hardcode://mixmorph.hardcode_sc.HardcodeSC',
+    'postgres://user:pwd@host/db_name/'
+)

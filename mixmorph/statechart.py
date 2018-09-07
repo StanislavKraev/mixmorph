@@ -1,45 +1,55 @@
 from typing import List, Optional
 
-from mixmorph import State, Transition, Event
+from mixmorph import State, Transition
+from mixmorph.conditions import StatechartCondition
 
 
 class Statechart:
 
-    def __init__(self):
-        # , states: dict, initial_state: State, state_transitions: Dict[str, List[Transition]]
+    def __init__(self, sc_id: str = None):
+        self._sc_id = sc_id
+
         self._states = {}
+        self._statecharts = {}
+
         self._initial_state = None
         self._state_transitions = {}
-        self._state = None
 
-    @property
-    def initial_state(self):
-        return self.get_state(self._initial_state)
+    def add_state(self, state_id: str) -> State:
+        state = State(state_id)
+        self._states[state_id] = state
+        return state
 
-    @initial_state.setter
-    def initial_state(self, value):
-        self._initial_state = value
+    def add_statechart(self, statechart_id: str):
+        sc = Statechart(statechart_id)
+        self._statecharts[statechart_id] = sc
+        return sc
 
-    def transitions(self, _state_id: str) -> List[Transition]:
-        return self._state_transitions.get(_state_id, [])
+    def add_transition(
+            self,
+            source_id: str,
+            event_id: str,
+            target: Optional[str] = None,
+            targets: Optional[List[str]] = None,
+            condition: StatechartCondition = None
+    ):
+        """
+        :param source_id: state id or statechart id
+        :param event_id:
+        :param target: target state or statechart id
+        :param targets: list of target state ids or statechart ids
+        :param condition: transition condition
+        """
+        assert target or targets
+        transition = Transition(event_id, targets or [target], condition=condition)
+        self._state_transitions.setdefault(source_id, []).append(transition)
+        return transition
 
-    @property
-    def state(self) -> State:
-        return self._state
-
-    @state.setter
-    def state(self, new_state: State):
-        self._state = new_state
+    def transitions(self, *states) -> List[Transition]:
+        all_transitions = []
+        for s in states:
+            all_transitions.extend(self._state_transitions.get(s, []))
+        return all_transitions
 
     def get_state(self, state_id: str) -> State:
         return self._states.get(state_id)
-
-    def add_state(self, state_id: str, on_enter=None, on_exit=None):
-        self._states[state_id] = State(
-            state_id,
-            on_enter=on_enter,
-            on_exit=on_exit
-        )
-
-    def add_transition(self, state_id: str, event_id: str, target: Optional[str] = None, action=None):
-        self._state_transitions.setdefault(state_id, []).append(Transition(event_id, target, action=action))

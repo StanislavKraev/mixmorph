@@ -1,14 +1,14 @@
 
 
 class State:
-    def __init__(self, state_id: str, on_enter=None, on_exit=None):
-        self._id = state_id
-        self._on_enter=on_enter
-        self._on_exit = on_exit
+    def __init__(self, state_id: str):
+        self._state_id = state_id
+        self._on_enter = None
+        self._on_exit = None
 
     @property
     def id(self):
-        return self._id
+        return self._state_id
 
     @property
     def on_enter(self):
@@ -25,4 +25,5 @@ class State:
         return other.id == self.id
 
     def __repr__(self):
-        return f"State('{self._id}') [id={id(self)}]"
+        return f"State('{self._state_id}') [id={id(self)}]"
+

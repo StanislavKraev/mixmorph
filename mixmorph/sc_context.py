@@ -1,10 +1,10 @@
-from mixmorph import State
+from typing import List
 
 
 class StatechartContext:
 
     def __init__(self):
-        self._state = None
+        self._state = []
         self._id = None
 
     @property
@@ -12,5 +12,5 @@ class StatechartContext:
         return self._state
 
     @state.setter
-    def state(self, new_state):
-        self._state = State(new_state) if isinstance(new_state, str) else new_state
+    def state(self, new_state: List[str]):
+        self._state = new_state
