@@ -1,0 +1,32 @@
+@startuml
+hide empty description
+scale 600 height
+
+[*] --> o.created
+o.created --> o.cancelled: cancel_order
+o.created --> process_order
+process_order --> o.cancelled: cancel_order (o.processing)
+
+State process_order {
+
+State fin_tx {
+    [*] --> f.created
+    f.created --> f.processing: process
+    f.processing --> f.approved: approve
+    f.approved --> f.completed: complete
+    f.approved --> f.cancelled: cancel
+    f.created --> f.cancelled: cancel
+    f.processing -left-> f.cancelled: cancel
+}
+
+--
+
+State order {
+    [*] --> o.processing
+    o.processing --> o.delivered: delivered
+}
+
+
+}
+
+@enduml

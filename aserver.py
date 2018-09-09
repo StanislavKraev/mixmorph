@@ -4,8 +4,8 @@ from aiohttp import web
 from aiohttp.web_request import Request
 
 from mixmorph import SCProcessor, Event
-from mixmorph.context_loader import StatechartContextLoader
 from mixmorph.loaders import SCFileLoader
+from mixmorph.loaders.context_loader_impl import StatechartContextLoader
 
 
 async def post_event(request: Request):

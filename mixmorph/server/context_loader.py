@@ -1,5 +1,4 @@
 from mixmorph import StatechartContext
-from mixmorph.context_loader import StatechartContextLoader
 
 
 class SCContextLoader:

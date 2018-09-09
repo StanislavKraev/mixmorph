@@ -4,7 +4,7 @@ import sqlalchemy as sa
 
 
 from mixmorph import StatechartContext
-
+from mixmorph.loaders.context_loader import ContextLoader
 
 metadata = sa.MetaData()
 tbl = sa.Table(
@@ -14,7 +14,9 @@ tbl = sa.Table(
 )
 
 
-class StatechartContextLoader:
+class PostgresContextLoader(ContextLoader):
+    schema = 'postgres'
+
     def __init__(self):
         self.engine = None
 

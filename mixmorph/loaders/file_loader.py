@@ -25,6 +25,8 @@ def _load_state_element(el):
 
 
 class SCFileLoader(StatechartLoader):
+    schema = 'file'
+
     def __init__(self):
         self._sc_cache = {}
 
