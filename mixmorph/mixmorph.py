@@ -36,6 +36,20 @@ class Mixmorph:
 
     async def process(self, statechart, context_id, event):
         print(statechart, context_id, event)
+        uri_info = self._parse_uri(statechart)
+        if uri_info.schema not in self._sc_loaders:
+            raise Exception(f'Unknown statechart type {uri_info.schema}')
+
+        loader = self._sc_loaders[uri_info.schema]
+        # todo
+
+    def send(self):
+        msg = Message(
+            target_address,
+            event,
+            data
+        )
+
 
     def _make_statechart_loader(self, loader_uri):
         uri_info = self._parse_uri(loader_uri)
