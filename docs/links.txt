@@ -1,2 +1,13 @@
 https://www.w3.org/TR/scxml
 https://docs.genesys.com/Documentation/OS/latest/Developer/SCXMLRef
+https://medium.com/@tombaeyens/event-driven-interface-design-209e7e2d3093
+https://martinfowler.com/articles/201701-event-driven.html
+https://hackernoon.com/events-as-first-class-citizens-8633e8479493
+
+http://eventuate.io/exampleapps.html
+https://github.com/johnbywater/eventsourcing
+https://breadcrumbscollector.tech/implementing-event-sourcing-in-python-part-1-aggregates/
+https://dzone.com/articles/event-sourcing-akka-fsms-and
+https://dzone.com/articles/event-sourcing-the-pains-of-wrongly-designed-aggre
+
+https://vaughnvernon.co/?p=838

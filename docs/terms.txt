@@ -1,0 +1,9 @@
+CQRS -- command query responsibility segregation
+optimistic concurrency
+event sourcing
+aggregates
+value objects
+repositories
+domain services
+bounded contexts
+association properties

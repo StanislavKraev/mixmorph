@@ -1,0 +1,16 @@
+@startuml
+
+
+component {
+    component issues
+    component payments
+    component "orders workflow" as orders
+
+    orders --> payments: create
+    orders --> issues: create
+    issues --> orders: events
+}
+
+component client
+client --> orders: create
+@enduml
